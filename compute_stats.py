@@ -52,7 +52,7 @@ def export_stats_to_excel(df, output_dir, variable):
 
 
 # Function calling
-df, info = read_xks_excel(r"C:\Code\TIP\Balance_hidrico\input\estaciones_ideam\1_El Paraiso.xlsx")
+""" df, info = read_xks_excel(r"C:\Code\TIP\Balance_hidrico\input\estaciones_ideam\1_El Paraiso.xlsx")
 output_dir = manage_station_directory(info['B2'])
 variable = info['B6']
 formatted_df = pivot_monthly_dataframe(df, output_dir, variable)
@@ -65,6 +65,6 @@ plot_multiyear_monthly_histogram(
     clean_data_df, 
     f"Histograma Mensual Multianual - {variable}",
     variable_labels[variable],
-    os.path.join(output_dir, f"{variable}_histograma.psng")
+    os.path.join(output_dir, f"{variable}_histograma.png")
     )
-    
+     """

@@ -1,5 +1,6 @@
 file_name= r"C:\Code\TIP\Isotopos_GNIP\input\file-1071955032401591.xlsx"
 output_stations = r"results\estaciones"
+input_stations = r"input\estaciones_ideam"
 sheet_name = "Data"
 #Minimum number of months per year with data to keep a station
 min_months_per_year = 4
@@ -8,5 +9,6 @@ z_score_threshold = 1.65
 
 variable_labels = {
     'PRECIPITACION': 'Precipitación [mm]',
+    'TEMPERATURA': 'degC',
 }
     

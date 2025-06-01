@@ -1,24 +1,38 @@
 import os
 from config import *
-import shutil
+
+from read_xks import *
+from format_data import pivot_monthly_dataframe
+from clean_data import clean_data
+from utils import manage_station_directory
+from plot_histogram import plot_multiyear_monthly_histogram
+from compute_stats import export_stats_to_excel
+
+
 
 #run the code for each file in a folder
+current_file_parent_dir = os.path.dirname(os.path.dirname((os.path.dirname(os.path.abspath(__file__)))))
+input_dir = os.path.join(current_file_parent_dir, input_stations)
 
-def manage_station_directory(station_name):
-    current_file_parent_dir = os.path.dirname(os.path.dirname((os.path.dirname(os.path.abspath(__file__)))))
-    output_dir = os.path.join(current_file_parent_dir, output_stations, station_name)
-    #Crear subdirectory para la estación relativo!!!! por lo que se va a ejecutar en otras maquinas
-    print (f"Output directory: {output_dir}")
-    if os.path.exists(output_dir):
-        # Remove all files and subdirectories in the output directory
-        for filename in os.listdir(output_dir):
-            file_path = os.path.join(output_dir, filename)
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-    else:
-        os.makedirs(output_dir)
+for filename in os.listdir(input_dir):
+    if filename.endswith('.xlsx') or filename.endswith('.xls'):
+        file_path = os.path.join(input_dir, filename)
 
-measurement_name = "El Paraiso [22]"
-manage_station_directory(measurement_name)
+        print('Running script for file: ',file_path)
+        
+        df, info = read_xks_excel(file_path)
+        output_dir = manage_station_directory(info['B2'])
+        variable = info['B6']
+        formatted_df = pivot_monthly_dataframe(df, output_dir, variable)
+        #print(formatted_df.head())
+        clean_data_df = clean_data(formatted_df, output_dir, variable)
+        print('#################')
+        print(clean_data_df.head(10))
+        export_stats_to_excel(clean_data_df, output_dir, variable)
+        plot_multiyear_monthly_histogram(
+            clean_data_df, 
+            f"Histograma Mensual Multianual - {variable}",
+            variable_labels[variable],
+            os.path.join(output_dir, f"{variable}_histograma.png")
+            )
+            

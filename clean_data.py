@@ -5,9 +5,9 @@ from utils import manage_station_directory
 import numpy as np
 import os
 
-def clean_data (df):
+def clean_data (df, output_dir, variable):
     df_dropped_years = drop_years_with_min_months(df)
-    cleaned_data = nullify_high_z_scores(df_dropped_years)
+    cleaned_data = nullify_high_z_scores(df_dropped_years, output_dir, variable)
     return cleaned_data
 
 def drop_years_with_min_months(df):
@@ -18,7 +18,7 @@ def drop_years_with_min_months(df):
     print(f"Dropped {dropped_rows} rows with less than {min_months_per_year} months.")
     return df
 
-def compute_z_scores(df):
+def compute_z_scores(df, output_dir, variable):
     selected_data = df[months].to_numpy()
     clean_values = selected_data[~np.isnan(selected_data)]
     mean = clean_values.mean()
@@ -36,14 +36,8 @@ def compute_z_scores(df):
     print('z_scores\n', z_scores.head())
     return z_scores
 
-def drop_z_scores(df, z_score_treshold):
-    z_scores = compute_z_scores(df)
-    df_cleaned = df[(z_scores[months] > z_score_treshold).all(axis=1)]
-    print(f"Dropped {len(df) - len(df_cleaned)} rows with Z-scores above {z_score_treshold}.")
-    return df_cleaned
-
-def nullify_high_z_scores(df):
-    z_scores = compute_z_scores(df)  # Assuming this returns same-shaped DataFrame
+def nullify_high_z_scores(df, output_dir, variable):
+    z_scores = compute_z_scores(df, output_dir, variable)  # Assuming this returns same-shaped DataFrame
     
     # Create a mask of values to nullify
     to_nullify = z_scores > z_score_threshold
@@ -70,10 +64,10 @@ def nullify_high_z_scores(df):
 
 
 # Function calling
-df, info = read_xks_excel(r"C:\Code\TIP\Balance_hidrico\input\estaciones_ideam\1_El Paraiso.xlsx")
+""" df, info = read_xks_excel(r"C:\Code\TIP\Balance_hidrico\input\estaciones_ideam\1_El Paraiso.xlsx")
 output_dir = manage_station_directory(info['B2'])
 variable = info['B6']
 formatted_df = pivot_monthly_dataframe(df, output_dir, variable)
 print(formatted_df.head())
 clean_data_df = clean_data(formatted_df)
-print(clean_data_df.head())
+print(clean_data_df.head()) """
