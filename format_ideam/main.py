@@ -12,7 +12,9 @@ from compute_stats import export_stats_to_excel
 
 #run the code for each file in a folder
 current_file_parent_dir = os.path.dirname(os.path.dirname((os.path.dirname(os.path.abspath(__file__)))))
+print('Current file parent dir: ', current_file_parent_dir)
 input_dir = os.path.join(current_file_parent_dir, input_stations)
+print('Input dir: ', input_dir)
 
 for filename in os.listdir(input_dir):
     if filename.endswith('.xlsx') or filename.endswith('.xls'):

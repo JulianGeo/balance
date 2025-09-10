@@ -10,5 +10,9 @@ z_score_threshold = 1.65
 variable_labels = {
     'PRECIPITACION': 'Precipitación [mm]',
     'TEMPERATURA': 'degC',
+    'BRILLO SOLAR': 'Horas/sol',
+    'CAUDAL': 'Caudal [m3/s]',
+    'DIR VIENTO': 'Sector',
+    'VEL VIENTO': 'Velocidad [m/s]',
 }
     
