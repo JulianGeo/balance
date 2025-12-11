@@ -1,5 +1,7 @@
 import numpy as np
 from typing import Tuple, Dict, Optional, Union
+from config import *
+import pandas as pd
 
 
 class NumpyMixingModel:
@@ -132,6 +134,113 @@ def example_usage():
             print(
                 f"{pair}: f1 = {result['fraction_end_member1']:.3f}, f2 = {result['fraction_end_member2']:.3f})"
             )
+
+
+######################################################
+#
+# ### Mix adapter functions to use with dataframes ####
+######################################################
+def remove_nans_from_df(df, element_names):
+    element_names = list(conservative_elements.keys())
+    df_to_check = df[element_names]
+    columns_with_nan = df_to_check.isna().any(axis=0)
+    columns_to_keep = columns_with_nan[~columns_with_nan].index.tolist()
+    columns_to_keep.extend(
+        [keyword["name"], keyword["end_member_type"], keyword["date"]]
+    )
+    df = df[columns_to_keep]
+
+    return df
+
+
+def df_mix_adapter(df):
+
+    # Assume df has columns: 'Tipo' and element names
+    # conservative_elements is a dict from config, use its keys as element names
+    element_names = list(conservative_elements.keys())
+
+    clean_df = remove_nans_from_df(df, element_names)
+
+    # Get reservoir and freshwater rows
+    reservoir_row = clean_df[
+        clean_df[keyword["end_member_type"]] == keyword["reservoir"]
+    ].iloc[0]
+    freshwater_row = clean_df[
+        clean_df[keyword["end_member_type"]] == keyword["freshwater"]
+    ].iloc[0]
+    mix_row = clean_df[clean_df[keyword["end_member_type"]] == keyword["mix"]].iloc[0]
+
+    # Only keep elements present in the dataframe columns
+    present_elements = [elem for elem in element_names if elem in clean_df.columns]
+
+    # Build dictionaries for each
+    reservoir = {elem: reservoir_row[elem] for elem in present_elements}
+    freshwater = {elem: freshwater_row[elem] for elem in present_elements}
+    mixed_sample = {elem: mix_row[elem] for elem in present_elements}
+
+    return {
+        "reservoir": reservoir,
+        "freshwater": freshwater,
+        "mixed_sample": mixed_sample,
+        "reservoir_name": reservoir_row[keyword["name"]],
+        "freshwater_name": freshwater_row[keyword["name"]],
+        "mix_name": mix_row[keyword["name"]],
+        "reservoir_date": reservoir_row[keyword["date"]],
+        "freshwater_date": freshwater_row[keyword["date"]],
+        "mix_date": mix_row[keyword["date"]],
+    }
+
+
+def run_mixing_model_with_adapter(df):
+    (
+        reservoir,
+        freshwater,
+        mixed_sample,
+        reservoir_name,
+        freshwater_name,
+        mix_name,
+        reservoir_date,
+        freshwater_date,
+        mix_date,
+    ) = df_mix_adapter(df).values()
+
+    model = NumpyMixingModel(reservoir, freshwater)
+
+    print("Mixed sample concentrations:")
+    for elem, conc in mixed_sample.items():
+        print(f"{elem}: {conc:.1f}")
+
+    # All elements
+    print("\n3. All element pair results:")
+    pairwise_results = model.calculate_all(mixed_sample)
+
+    results = []
+    for pair, result in pairwise_results.items():
+        if "error" not in result:
+            """print(
+                f"{pair}: f1 = {result['fraction_end_member1']:.3f}, f2 = {result['fraction_end_member2']:.3f})"
+            )"""
+
+            result = {
+                "elemento": pair,
+                "muestra_reservorio": reservoir_name,
+                "fecha_reservorio": reservoir_date,
+                "concentración_reservorio": reservoir[pair],
+                "muestra_meteorica": freshwater_name,
+                "fecha_meteorica": freshwater_date,
+                "concentración_meteorica": freshwater[pair],
+                "muestra_mezcla": mix_name,
+                "fecha_mezcla": mix_date,
+                "concentración_mezcla": mixed_sample[pair],
+                "fraccion_reservorio": result["fraction_end_member1"],
+                "fraccion_meteorica": result["fraction_end_member2"],
+            }
+            results.append(result)
+
+    results_df = pd.DataFrame(results)
+    # print("\nDataFrame of results:")
+    # print(results_df)
+    return results_df
 
 
 if __name__ == "__main__":
