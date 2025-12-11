@@ -4,12 +4,15 @@ from config import *
 
 df = read_excel_to_dataframe(excel_file_path, data_sheet_name)
 df = df[df[complejo_volcanico_column_name] == complejo_volcanico_name]
-df = df[df["Subcuenca"] == "Guaitara"]
+df_guaitara = df[df["Subcuenca"] == "Guaitara"]
+df_mira = df[df["Subcuenca"] == "Mira"]
+df_crater = df[df["Subcuenca"] == "Crater"]
+dfs = [df_guaitara, df_mira]
 
 print(len(df))
 
 create_histograms(
-    df,
+    dfs,
     [
         "pH in situ",
         "T°",
