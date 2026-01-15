@@ -1,4 +1,4 @@
-file_name = r"C:\Code\TIP\Balance_hidrico\input\estaciones_ideam\Est. Barbascal.xlsx"
+file_name = r"C:\Code\TIP\Balance_hidrico\input\estaciones_ideam\paraiso_temp.xlsx"
 output_stations = r"results\estaciones"
 input_stations = r"input\estaciones_ideam"
 sheet_name = "Data"

@@ -54,3 +54,64 @@ def create_histograms(dataframes, column_names, output_dir=output_plots_path):
         plt.savefig(filename, dpi=300, bbox_inches="tight")
         plt.close()
         print(f"Saved: {filename}")
+
+
+def create_crossplot(
+    dataframe, x_column, y_column, tag_column, output_dir=output_plots_path
+):
+    """
+    Create and save a crossplot for two columns with points tagged by a third column.
+
+    Args:
+        dataframe: pandas DataFrame
+        x_column: name of column for x-axis
+        y_column: name of column for y-axis
+        tag_column: name of column to tag/color each point
+        output_dir: directory to save crossplot image
+    """
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Convert to numeric and drop NaN
+    x_data = pd.to_numeric(dataframe[x_column], errors="coerce")
+    y_data = pd.to_numeric(dataframe[y_column], errors="coerce")
+    tags = dataframe[tag_column]
+
+    # Create mask for valid data
+    mask = x_data.notna() & y_data.notna()
+    x_data = x_data[mask]
+    y_data = y_data[mask]
+    tags = tags[mask]
+
+    plt.figure(figsize=(10, 6))
+
+    # Plot each tag group with different colors and markers
+    colors = plt.cm.tab10(range(len(tags.unique())))
+    markers = ["o", "s", "^", "D", "v", "*", "p", "H", "+", "x"]
+
+    for idx, tag in enumerate(tags.unique()):
+        tag_mask = tags == tag
+        plt.scatter(
+            x_data[tag_mask],
+            y_data[tag_mask],
+            color=colors[idx % len(colors)],
+            marker=markers[idx % len(markers)],
+            alpha=0.6,
+            edgecolor="black",
+            s=50,
+            label=tag,
+        )
+
+    plt.ylim(0.1, 10000)
+    plt.xscale("linear")
+    plt.yscale("log")
+    plt.xlabel(x_column)
+    plt.ylabel(y_column)
+    # plt.title(f"Crossplot: {x_column} vs {y_column}")
+    plt.legend(title="Spring", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.grid(alpha=0.3)
+
+    filename = output_path / f"{x_column}_vs_{y_column}_crossplot.svg"
+    plt.savefig(filename, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {filename}")

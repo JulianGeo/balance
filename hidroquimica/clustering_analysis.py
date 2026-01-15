@@ -1,3 +1,5 @@
+from config import *
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -45,6 +47,11 @@ def plot_pca_results(cumulative_variance):
     # Sugerencia: Busque el punto donde la curva se "dobla" (el codo) o donde alcanza ~85-90%
     plt.axhline(y=0.85, color="r", linestyle="-")
     plt.text(1, 0.86, "85% Varianza", color="red")
+    plt.savefig(
+        os.path.join(output_plots_clustering_path, "cumulative_variance.png"),
+        dpi=300,
+        bbox_inches="tight",
+    )
     plt.show()
 
     """
@@ -102,6 +109,11 @@ def loading_analysis(pca_final, columns, k):
         loadings_df, annot=True, cmap="vlag", fmt=".2f", linewidths=0.5, center=0
     )
     plt.title("Heatmap de Cargas de PCA")
+    plt.savefig(
+        os.path.join(output_plots_clustering_path, "PCA_loads_heatmap.png"),
+        dpi=300,
+        bbox_inches="tight",
+    )
     plt.show()
 
 
@@ -121,6 +133,11 @@ def hierarchical_clustering(X_pca, df, X_pca_df, max_clusters=10):
     plt.xlabel("Índice de Muestra")
     plt.ylabel("Distancia (Disimilitud de Ward)")
     # La altura donde "corta" el dendrograma define el número de clústeres
+    plt.savefig(
+        os.path.join(output_plots_clustering_path, "cluster_dendogram.png"),
+        dpi=300,
+        bbox_inches="tight",
+    )
     plt.show()
 
     ### PAsar a otra función?
@@ -149,21 +166,41 @@ def zoning_validation(df, X_pca_df, pca_final, n_clusters_optimo):
     print(pd.crosstab(df["Subcuenca"], df["Cluster_ID"]))
 
     # 5.2 Visualización Final de Clústeres en el Espacio PCA
+    # prepare a plotting dataframe that contains the PCA coords and metadata
+    plot_df = X_pca_df.copy()
+    plot_df["Subcuenca"] = df["Subcuenca"]
+    # add sample tag to label points
+    plot_df["Termal"] = df["Termal"]
+
     plt.figure(figsize=(10, 8))
     sns.scatterplot(
-        x=X_pca_df["PC1"],
-        y=X_pca_df["PC2"],
+        x="PC1",
+        y="PC2",
         hue="Cluster_ID",
-        style=df["Subcuenca"],
+        style="Subcuenca",
         palette="viridis",
         s=150,
-        data=X_pca_df,
+        data=plot_df,
     )
     plt.title(f"Clústeres Identificados (k={n_clusters_optimo}) en Espacio PCA")
     plt.xlabel(f"PC1 ({pca_final.explained_variance_ratio_[0]*100:.1f} %)")
     plt.ylabel(f"PC2 ({pca_final.explained_variance_ratio_[1]*100:.1f} %)")
     plt.grid(True)
+
+    # annotate each point with the sample tag from `Termal`
+    x_range = plot_df["PC1"].max() - plot_df["PC1"].min()
+    y_range = plot_df["PC2"].max() - plot_df["PC2"].min()
+    dx = x_range * 0.02 if x_range != 0 else 0.01
+    dy = y_range * 0.02 if y_range != 0 else 0.01
+    for idx, row in plot_df.iterrows():
+        plt.text(row["PC1"] + dx, row["PC2"] + dy, str(row["Termal"]), fontsize=8)
+
     plt.legend(title="Cluster ID / Subcuenca")
+    plt.savefig(
+        os.path.join(output_plots_clustering_path, "cluster_zoning_validation.png"),
+        dpi=300,
+        bbox_inches="tight",
+    )
     plt.show()
 
 
