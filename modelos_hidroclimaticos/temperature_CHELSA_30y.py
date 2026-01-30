@@ -43,13 +43,21 @@ for anio in range(anio_inicio, anio_fin + 1):
                 # Recortar
                 recorte = src.rio.clip(poligono.geometry.apply(mapping), poligono.crs)
 
-                # --- OPCIONAL: CONVERSIÓN A CELSIUS ---
-                # CHELSA tas: (valor * 0.1) - 273.15
-                # recorte_celsius = recorte - 273.15
-                recorte_celsius = recorte
+                # 2. CONVERSIÓN CORRECTA
+                # CHELSA tas: (valor_crudo * 0.1) - 273.15
+                # Forzamos a float para asegurar precisión decimal
+                recorte_celsius = (recorte.astype(float) * 0.1) - 273.15
 
-                # Guardar el recorte ya convertido
-                recorte_celsius.rio.to_raster(ruta_final)
+                # 3. LIMPIEZA DE METADATOS (Fundamental)
+                # Eliminamos escalas y offsets previos para que el software GIS no los reaplique
+                recorte_celsius.attrs["scale_factor"] = 1.0
+                recorte_celsius.attrs["add_offset"] = 0.0
+                recorte_celsius.rio.write_nodata(-9999, inplace=True)
+
+                # 4. Guardar como float32
+                recorte_celsius.rio.to_raster(
+                    ruta_final, dtype="float32", driver="GTiff"
+                )
                 print(f"   ✅ Guardado: {nombre_final} (°C)")
 
         except Exception as e:
