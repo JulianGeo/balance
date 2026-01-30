@@ -4,7 +4,7 @@ from config import *
 from cluster_creator import *
 from pca_analysis import *
 from clustering_analysis import *
-from ionic_balance import calculate_ionic_balance
+from code.hidroquimica.preprocess.ionic_balance import calculate_ionic_balance
 from preprocess_data import log_transform_data
 
 df = read_excel_to_dataframe(excel_file_path, data_sheet_name)
