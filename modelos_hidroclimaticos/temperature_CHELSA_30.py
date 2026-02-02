@@ -5,16 +5,29 @@ import os
 from config import *
 import requests
 
+os.environ["GDAL_NUM_THREADS"] = "1"  # Fuerza a usar solo 1 hilo
+os.environ["OMP_NUM_THREADS"] = "1"
+
 
 def descargar_seguro(url, ruta_temp):
-    print(f"📥 Descargando a disco (bajo consumo de CPU)...")
-    with requests.get(url, stream=True, timeout=900) as r:
-        r.raise_for_status()
-        with open(ruta_temp, "wb") as f:
-            for chunk in r.iter_content(chunk_size=1024 * 1024):  # 1MB por vez
-                if chunk:
+    """
+    Descarga el archivo por trozos (chunks) para no saturar RAM ni CPU.
+    Retorna la ruta si tuvo éxito, o None si falló.
+    """
+    try:
+        print(f"📥 Descargando archivo global (3 min aprox)...")
+        with requests.get(url, stream=True, timeout=900) as r:
+            r.raise_for_status()
+            with open(ruta_temp, "wb") as f:
+                # Escribimos en el disco bloque por bloque
+                for chunk in r.iter_content(chunk_size=1024 * 1024):  # 1MB
                     f.write(chunk)
-    print("✅ Descarga completada.")
+        return ruta_temp
+    except Exception as e:
+        print(f"❌ Error en descarga: {e}")
+        if os.path.exists(ruta_temp):
+            os.remove(ruta_temp)  # Limpiar si quedó a medias
+        return None
 
 
 # --- 2. CARGAR POLÍGONO ---
@@ -45,8 +58,8 @@ for anio in range(anio_inicio, anio_fin + 1):
         print(f"Descargando Temperatura: {anio}-{mes_str}...")
 
         try:
-            descargar_seguro(url, "temp.tif")
-            with rioxarray.open_rasterio("temp.tif", masked=True) as src:
+            file = descargar_seguro(url, "temp.tif")
+            with rioxarray.open_rasterio(file, masked=True) as src:
                 if poligono.crs != src.rio.crs:
                     poligono = poligono.to_crs(src.rio.crs)
 
@@ -73,5 +86,10 @@ for anio in range(anio_inicio, anio_fin + 1):
 
         except Exception as e:
             print(f"   ⚠️ Falló {anio}-{mes_str}. Error: {e}")
+
+        finally:
+            if os.path.exists(file):
+                os.remove(file)
+                print(f"🗑️ Archivo global borrado para liberar espacio.")
 
 print("\n🚀 ¡PROCESO DE TEMPERATURA FINALIZADO!")
