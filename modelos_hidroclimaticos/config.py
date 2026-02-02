@@ -13,15 +13,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if ENTORNO == "TEST":
     # Rutas dentro del contenedor (Linux style)
     ruta_shape = "/app/data/shapefiles/area_estudio.shp"
-    carpeta_salida_temper = "/app/results/modelos_hidroclimaticos/database/temperatura"
+    carpeta_salida_temper = (
+        "/app/data/results/modelos_hidroclimaticos/database/temperatura"
+    )
+
+    # TODO! Asegurarse de que las carpetas existen!!!
 
 else:
     # Rutas en tu PC (Windows style)
     # Usamos .resolve() para que Python gestione las letras de unidad (C:, D:)
-    ruta_shape = BASE_DIR / "input" / "shapefiles" / "" / "area_estudio.shp"
+    ruta_shape = BASE_DIR / "input" / "shapefiles" / "area_estudio.shp"
     carpeta_salida_temper = (
         BASE_DIR / "results" / "modelos_hidroclimaticos" / "database" / "temperatura"
     )
+
+
+# Create directories if they don't exist
+os.makedirs(carpeta_salida_temper, exist_ok=True)
 
 # Convertir a string para evitar errores con librerías viejas
 ruta_shape = str(ruta_shape)
