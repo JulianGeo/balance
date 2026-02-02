@@ -4,6 +4,10 @@ FROM pangeo/pangeo-notebook:latest
 # Directorio de trabajo en el contenedor
 WORKDIR /app
 
+# Creamos las carpetas necesarias
+RUN mkdir -p /app/data/shapefiles
+RUN mkdir -p /app/data/results/modelos_hidroclimaticos/database/temperatura
+
 # Copiamos los archivos de requerimientos primero para aprovechar la cache
 COPY requirements.txt .
 

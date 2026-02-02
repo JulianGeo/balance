@@ -17,8 +17,6 @@ if ENTORNO == "TEST":
         "/app/data/results/modelos_hidroclimaticos/database/temperatura"
     )
 
-    # TODO! Asegurarse de que las carpetas existen!!!
-
 else:
     # Rutas en tu PC (Windows style)
     # Usamos .resolve() para que Python gestione las letras de unidad (C:, D:)
