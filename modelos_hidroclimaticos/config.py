@@ -25,10 +25,6 @@ else:
         BASE_DIR / "results" / "modelos_hidroclimaticos" / "database" / "temperatura"
     )
 
-
-# Create directories if they don't exist
-os.makedirs(carpeta_salida_temper, exist_ok=True)
-
 # Convertir a string para evitar errores con librerías viejas
 ruta_shape = str(ruta_shape)
 carpeta_salida_temper = str(carpeta_salida_temper)
