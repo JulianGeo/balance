@@ -3,6 +3,19 @@ import geopandas as gpd
 from shapely.geometry import mapping
 import os
 from config import *
+import requests
+
+
+def descargar_seguro(url, ruta_temp):
+    print(f"📥 Descargando a disco (bajo consumo de CPU)...")
+    with requests.get(url, stream=True, timeout=900) as r:
+        r.raise_for_status()
+        with open(ruta_temp, "wb") as f:
+            for chunk in r.iter_content(chunk_size=1024 * 1024):  # 1MB por vez
+                if chunk:
+                    f.write(chunk)
+    print("✅ Descarga completada.")
+
 
 # --- 2. CARGAR POLÍGONO ---
 poligono = gpd.read_file(ruta_shape)
@@ -32,7 +45,8 @@ for anio in range(anio_inicio, anio_fin + 1):
         print(f"Descargando Temperatura: {anio}-{mes_str}...")
 
         try:
-            with rioxarray.open_rasterio(url, masked=True) as src:
+            descargar_seguro(url, "temp.tif")
+            with rioxarray.open_rasterio("temp.tif", masked=True) as src:
                 if poligono.crs != src.rio.crs:
                     poligono = poligono.to_crs(src.rio.crs)
 

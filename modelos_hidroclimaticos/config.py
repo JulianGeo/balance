@@ -1,6 +1,10 @@
 import os
 from pathlib import Path
 
+
+os.environ["GDAL_NUM_THREADS"] = "1"  # Fuerza a usar solo 1 hilo
+os.environ["OMP_NUM_THREADS"] = "1"
+
 # 1. Detectar si estamos en Docker o Local
 # Si la variable de entorno no existe, devolvemos 'LOCAL'
 ENTORNO = os.getenv("APP_ENV", "LOCAL")
