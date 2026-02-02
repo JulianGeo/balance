@@ -59,12 +59,16 @@ for anio in range(anio_inicio, anio_fin + 1):
 
         try:
             file = descargar_seguro(url, "temp.tif")
-            with rioxarray.open_rasterio(file, masked=True) as src:
+            with rioxarray.open_rasterio(
+                file, chunks={"x": 1024, "y": 1024}, masked=True
+            ) as src:
                 if poligono.crs != src.rio.crs:
                     poligono = poligono.to_crs(src.rio.crs)
 
                 # Recortar
-                recorte = src.rio.clip(poligono.geometry.apply(mapping), poligono.crs)
+                recorte = src.rio.clip(
+                    poligono.geometry.apply(mapping), poligono.crs, from_disk=True
+                )
 
                 # 2. CONVERSIÓN CORRECTA
                 # CHELSA tas: (valor_crudo * 0.1) - 273.15
