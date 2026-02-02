@@ -50,6 +50,7 @@ for anio in range(anio_inicio, anio_fin + 1):
                 recorte_celsius.attrs["add_offset"] = 0.0
                 recorte_celsius.rio.write_nodata(-9999, inplace=True)
 
+                print("Guardando archivo en °C...")
                 # 4. Guardar como float32
                 recorte_celsius.rio.to_raster(
                     ruta_final, dtype="float32", driver="GTiff"
