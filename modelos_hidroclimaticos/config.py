@@ -25,6 +25,9 @@ else:
         BASE_DIR / "results" / "modelos_hidroclimaticos" / "database" / "temperatura"
     )
 
+    if not os.path.exists(carpeta_salida_temper):
+        os.makedirs(carpeta_salida_temper)
+
 # Convertir a string para evitar errores con librerías viejas
 ruta_shape = str(ruta_shape)
 carpeta_salida_temper = str(carpeta_salida_temper)

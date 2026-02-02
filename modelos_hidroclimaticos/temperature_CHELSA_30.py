@@ -4,10 +4,6 @@ from shapely.geometry import mapping
 import os
 from config import *
 
-
-if not os.path.exists(carpeta_salida_temper):
-    os.makedirs(carpeta_salida_temper)
-
 # --- 2. CARGAR POLÍGONO ---
 poligono = gpd.read_file(ruta_shape)
 
